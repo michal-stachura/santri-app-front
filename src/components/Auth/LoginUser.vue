@@ -7,14 +7,14 @@
       <q-form @submit="onSubmit()">
         <div class="q-gutter-md">
           <div>
-            <q-input v-model="formData.login" label="Email" :rules="[
+            <q-input v-model="formData.username" label="Email" :rules="[
               (val) =>
                 isValidEmailAddress(val) || 'Please enter a valid email address'
             ]" />
           </div>
           <div>
             <q-input v-model="formData.password" type="password" label="Password"
-              :rules="[(val) => val.length >= 6 || 'Please use minimum 6 characters']" />
+              :rules="[(val) => val.length >= 5 || 'Please use minimum 5 characters']" />
           </div>
 
         </div>
@@ -38,7 +38,7 @@ import { useAuthStore } from 'src/stores/auth-store';
 const authStore = useAuthStore();
 const { loginUser } = authStore;
 const formData = reactive<LoginForm>({
-  login: '',
+  username: '',
   password: ''
 });
 
@@ -47,7 +47,6 @@ const isValidEmailAddress = (email: string): boolean => {
   return regex.test(email);
 };
 const onSubmit = () => {
-  console.log(formData);
   loginUser(formData);
 }
 
