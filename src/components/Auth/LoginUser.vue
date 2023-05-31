@@ -7,13 +7,13 @@
       <q-form @submit="onSubmit()">
         <div class="q-gutter-md">
           <div>
-            <q-input v-model="formData.username" label="Email" :rules="[
+            <q-input autofocus lazy-rules v-model="formData.username" label="Email" :rules="[
               (val) =>
                 isValidEmailAddress(val) || 'Please enter a valid email address'
             ]" />
           </div>
           <div>
-            <q-input v-model="formData.password" type="password" label="Password"
+            <q-input lazy-rules v-model="formData.password" type="password" label="Password"
               :rules="[(val) => val.length >= 5 || 'Please use minimum 5 characters']" />
           </div>
 
