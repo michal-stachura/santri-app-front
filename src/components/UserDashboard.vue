@@ -13,10 +13,17 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useAuthStore } from 'src/stores/auth-store';
+import { storeToRefs } from 'pinia';
+const authStore = useAuthStore();
+
+const { userToken } = storeToRefs(authStore);
+
 
 const chatSocket = new WebSocket(
-  'ws://127.0.0.1:8000/ws/chat/lobby/'
+  `ws://127.0.0.1:8000/ws/chat/lobby/?token=${userToken.value}`
 );
+
 const chatMessages = ref<string[]>([]);
 
 
