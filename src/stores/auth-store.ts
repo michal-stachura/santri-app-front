@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { Loading, LocalStorage, useQuasar } from 'quasar';
 import { showErrorMessage } from 'src/composables/show-error-message';
-import { LoginForm } from 'src/types/User';
+import { LoginForm, User } from 'src/types/User';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
@@ -10,11 +10,13 @@ import { DrfError } from 'src/types/DrfError';
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
   const $q = useQuasar();
-  const userToken = ref<string | null>(
-    LocalStorage.getItem('sapp_userToken') === 'null'
+  const loggedUser = ref<User | null>(
+    LocalStorage.getItem('sapp_user') === 'null'
       ? null
-      : `${LocalStorage.getItem('sapp_userToken')}`
+      : LocalStorage.getItem('sapp_user')
   );
+  const dashboardSocket = ref<WebSocket | null>(null);
+  const dashboardMessages = ref<string[]>([]);
 
   const loginUser = async (payload: LoginForm) => {
     Loading.show();
@@ -26,8 +28,25 @@ export const useAuthStore = defineStore('auth', () => {
       })
       .then((response) => {
         if (response.status === 200) {
-          userToken.value = response.data.token;
-          LocalStorage.set('sapp_userToken', userToken.value);
+          loggedUser.value = {
+            token: response.data.token,
+            email: payload.username
+          };
+          LocalStorage.set('sapp_user', loggedUser.value);
+          dashboardSocket.value = new WebSocket(
+            `ws://127.0.0.1:8000/ws/dashboard/${loggedUser.value.token}/?email=${loggedUser.value.email}`
+          );
+
+          dashboardSocket.value.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            dashboardMessages.value.push(data.message);
+          };
+
+          dashboardSocket.value.onclose = function (e) {
+            console.log(e);
+            console.error('Chat socket closed unexpectedly');
+          };
+
           $q.notify({
             color: 'green-4',
             textColor: 'white',
@@ -53,15 +72,20 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const logoutUser = async () => {
-    userToken.value = null;
-    LocalStorage.set('sapp_userToken', null);
+    loggedUser.value = null;
+    LocalStorage.set('sapp_user', null);
+    if (dashboardSocket.value) {
+      dashboardSocket.value.close();
+      dashboardSocket.value = null;
+    }
     router.replace('/auth').catch((error: Error) => {
       showErrorMessage(error.message);
     });
   };
 
   return {
-    userToken,
+    loggedUser,
+    dashboardMessages,
     loginUser,
     logoutUser
   };

@@ -11,13 +11,13 @@
             Santri App
           </q-btn>
         </q-toolbar-title>
-        <q-btn v-if="userToken" dense flat round icon="menu" @click="toggleMenu" />
-        <q-btn v-if="userToken" dense flat round icon="logout" @click="logoutUser" />
+        <q-btn v-if="loggedUser" dense flat round icon="menu" @click="toggleMenu" />
+        <q-btn v-if="loggedUser" dense flat round icon="logout" @click="logoutUser" />
       </q-toolbar>
     </q-header>
 
     <q-drawer show-if-above v-model="rightDrawerOpen" side="left" bordered>
-      <q-list v-if="userToken">
+      <q-list v-if="loggedUser">
         <q-item-label header>
           Essential Links
         </q-item-label>
@@ -50,9 +50,7 @@ import EssentialLink from 'components/EssentialLink.vue';
 
 const authStore = useAuthStore();
 const { logoutUser } = authStore;
-const { userToken } = storeToRefs(authStore);
-
-console.log(userToken.value);
+const { loggedUser } = storeToRefs(authStore);
 
 const rightDrawerOpen = ref(false);
 
