@@ -16,7 +16,44 @@ export const useAuthStore = defineStore('auth', () => {
       : LocalStorage.getItem('sapp_user')
   );
   const dashboardSocket = ref<WebSocket | null>(null);
-  const dashboardMessages = ref<string[]>([]);
+
+  const openWebSocket = async () => {
+    if (loggedUser.value) {
+      dashboardSocket.value = new WebSocket(
+        'ws://127.0.0.1:8000/ws/dashboard/'
+      );
+
+      dashboardSocket.value.onopen = () => {
+        dashboardSocket.value?.send(
+          JSON.stringify({ token: loggedUser.value?.token })
+        );
+      };
+
+      dashboardSocket.value.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        switch (data.message?.type) {
+          case 'new-notification':
+            console.log(data.message.unread_messages);
+            break;
+
+          default:
+            break;
+        }
+      };
+
+      dashboardSocket.value.onclose = (e) => {
+        console.log(e);
+        console.error('Chat socket closed unexpectedly');
+      };
+    }
+  };
+
+  const closeWebSocket = async () => {
+    if (dashboardSocket.value) {
+      dashboardSocket.value.close();
+      dashboardSocket.value = null;
+    }
+  };
 
   const loginUser = async (payload: LoginForm) => {
     Loading.show();
@@ -29,24 +66,10 @@ export const useAuthStore = defineStore('auth', () => {
       .then((response) => {
         if (response.status === 200) {
           loggedUser.value = {
-            token: response.data.token,
-            email: payload.username
+            token: response.data.token
           };
           LocalStorage.set('sapp_user', loggedUser.value);
-          dashboardSocket.value = new WebSocket(
-            `ws://127.0.0.1:8000/ws/dashboard/${loggedUser.value.token}/?email=${loggedUser.value.email}`
-          );
-
-          dashboardSocket.value.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-            dashboardMessages.value.push(data.message);
-          };
-
-          dashboardSocket.value.onclose = function (e) {
-            console.log(e);
-            console.error('Chat socket closed unexpectedly');
-          };
-
+          openWebSocket();
           $q.notify({
             color: 'green-4',
             textColor: 'white',
@@ -74,10 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
   const logoutUser = async () => {
     loggedUser.value = null;
     LocalStorage.set('sapp_user', null);
-    if (dashboardSocket.value) {
-      dashboardSocket.value.close();
-      dashboardSocket.value = null;
-    }
+    closeWebSocket();
     router.replace('/auth').catch((error: Error) => {
       showErrorMessage(error.message);
     });
@@ -85,8 +105,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     loggedUser,
-    dashboardMessages,
+    dashboardSocket,
     loginUser,
-    logoutUser
+    logoutUser,
+    openWebSocket,
+    closeWebSocket
   };
 });
