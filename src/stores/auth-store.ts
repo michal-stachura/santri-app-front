@@ -20,7 +20,7 @@ export const useAuthStore = defineStore('auth', () => {
   const openWebSocket = async () => {
     if (loggedUser.value) {
       dashboardSocket.value = new WebSocket(
-        'ws://127.0.0.1:8000/ws/dashboard/'
+        'wss://api.santri.it:62391/ws/dashboard/'
       );
 
       dashboardSocket.value.onopen = () => {
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       dashboardSocket.value.onclose = (e) => {
         console.log(e);
-        console.error('Chat socket closed unexpectedly');
+        console.error('Dashboard socket closed unexpectedly');
       };
     }
   };
@@ -59,7 +59,7 @@ export const useAuthStore = defineStore('auth', () => {
     Loading.show();
 
     axios
-      .post('http://127.0.0.1:8000/api/auth-token/', {
+      .post('https://api.santri.it:62391/api/auth-token/', {
         username: payload.username,
         password: payload.password
       })
