@@ -10,18 +10,23 @@ import { DrfError } from 'src/types/DrfError';
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
   const $q = useQuasar();
+
   const loggedUser = ref<User | null>(
     LocalStorage.getItem('sapp_user') === 'null'
       ? null
       : LocalStorage.getItem('sapp_user')
   );
   const dashboardSocket = ref<WebSocket | null>(null);
-
+  
   const openWebSocket = async () => {
     if (loggedUser.value) {
       dashboardSocket.value = new WebSocket(
         'wss://api.santri.it:62391/ws/dashboard/'
       );
+
+      // dashboardSocket.value = new WebSocket(
+      //   'ws://127.0.0.1:8000/ws/dashboard/'
+      // );
 
       dashboardSocket.value.onopen = () => {
         dashboardSocket.value?.send(
@@ -31,9 +36,9 @@ export const useAuthStore = defineStore('auth', () => {
 
       dashboardSocket.value.onmessage = (e) => {
         const data = JSON.parse(e.data);
-        switch (data.message?.type) {
-          case 'new-notification':
-            console.log(data.message.unread_messages);
+        switch (data.type) {
+          case 'dashboard.notification':
+            console.log(data.message);
             break;
 
           default:
@@ -57,9 +62,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   const loginUser = async (payload: LoginForm) => {
     Loading.show();
-
+    const url = 'https://api.santri.it:62391/api/auth-token/';
+    // const url = 'http://127.0.0.1:8000/api/auth-token/';
     axios
-      .post('https://api.santri.it:62391/api/auth-token/', {
+      .post(url, {
         username: payload.username,
         password: payload.password
       })
