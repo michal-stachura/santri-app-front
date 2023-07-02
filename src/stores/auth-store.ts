@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { Loading, LocalStorage, useQuasar } from 'quasar';
 import { showErrorMessage } from 'src/composables/show-error-message';
-import { LoginForm } from 'src/types/User';
+import { LoginForm, User } from 'src/types/User';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
@@ -10,24 +10,72 @@ import { DrfError } from 'src/types/DrfError';
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
   const $q = useQuasar();
-  const userToken = ref<string | null>(
-    LocalStorage.getItem('sapp_userToken') === 'null'
+
+  const loggedUser = ref<User | null>(
+    LocalStorage.getItem('sapp_user') === 'null'
       ? null
-      : `${LocalStorage.getItem('sapp_userToken')}`
+      : LocalStorage.getItem('sapp_user')
   );
+  const dashboardSocket = ref<WebSocket | null>(null);
+  
+  const openWebSocket = async () => {
+    if (loggedUser.value) {
+      dashboardSocket.value = new WebSocket(
+        'wss://api.santri.it:62391/ws/dashboard/'
+      );
+
+      // dashboardSocket.value = new WebSocket(
+      //   'ws://127.0.0.1:8000/ws/dashboard/'
+      // );
+
+      dashboardSocket.value.onopen = () => {
+        dashboardSocket.value?.send(
+          JSON.stringify({ token: loggedUser.value?.token })
+        );
+      };
+
+      dashboardSocket.value.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        switch (data.type) {
+          case 'dashboard.notification':
+            console.log(data.message);
+            break;
+
+          default:
+            break;
+        }
+      };
+
+      dashboardSocket.value.onclose = (e) => {
+        console.log(e);
+        console.error('Dashboard socket closed unexpectedly');
+      };
+    }
+  };
+
+  const closeWebSocket = async () => {
+    if (dashboardSocket.value) {
+      dashboardSocket.value.close();
+      dashboardSocket.value = null;
+    }
+  };
 
   const loginUser = async (payload: LoginForm) => {
     Loading.show();
-
+    const url = 'https://api.santri.it:62391/api/auth-token/';
+    // const url = 'http://127.0.0.1:8000/api/auth-token/';
     axios
-      .post('http://127.0.0.1:8000/api/auth-token/', {
+      .post(url, {
         username: payload.username,
         password: payload.password
       })
       .then((response) => {
         if (response.status === 200) {
-          userToken.value = response.data.token;
-          LocalStorage.set('sapp_userToken', userToken.value);
+          loggedUser.value = {
+            token: response.data.token
+          };
+          LocalStorage.set('sapp_user', loggedUser.value);
+          openWebSocket();
           $q.notify({
             color: 'green-4',
             textColor: 'white',
@@ -53,16 +101,20 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const logoutUser = async () => {
-    userToken.value = null;
-    LocalStorage.set('sapp_userToken', null);
+    loggedUser.value = null;
+    LocalStorage.set('sapp_user', null);
+    closeWebSocket();
     router.replace('/auth').catch((error: Error) => {
       showErrorMessage(error.message);
     });
   };
 
   return {
-    userToken,
+    loggedUser,
+    dashboardSocket,
     loginUser,
-    logoutUser
+    logoutUser,
+    openWebSocket,
+    closeWebSocket
   };
 });
