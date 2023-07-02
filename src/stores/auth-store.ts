@@ -11,10 +11,6 @@ export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
   const $q = useQuasar();
 
-  if (process.env.APP_API_URL) {
-  }
-  console.log(process.env.APP_API_URL)
-
   const loggedUser = ref<User | null>(
     LocalStorage.getItem('sapp_user') === 'null'
       ? null
@@ -50,7 +46,6 @@ export const useAuthStore = defineStore('auth', () => {
   
         dashboardSocket.value.onclose = (e) => {
           console.log(e);
-          console.error('Dashboard socket closed unexpectedly');
         };
       }
     }
@@ -65,7 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const loginUser = async (payload: LoginForm) => {
     Loading.show();
-    const url = process.env.APP_API_URL;
+    const url = `${process.env.APP_API_URL}/auth-token/`;
     if (url) {
       axios
         .post(url, {
@@ -75,7 +70,8 @@ export const useAuthStore = defineStore('auth', () => {
         .then((response) => {
           if (response.status === 200) {
             loggedUser.value = {
-              token: response.data.token
+              token: response.data.token,
+              username: payload.username,
             };
             LocalStorage.set('sapp_user', loggedUser.value);
             openWebSocket();

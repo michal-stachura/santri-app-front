@@ -1,5 +1,6 @@
 <template>
   <q-item
+    v-if="shouldDisplayItem"
     clickable
     tag="a"
     target="_blank"
@@ -20,15 +21,30 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from 'src/stores/auth-store';
+import { computed } from 'vue';
+
 export interface EssentialLinkProps {
   title: string;
   caption?: string;
   link?: string;
   icon?: string;
+  loginRequired?: boolean
 }
-withDefaults(defineProps<EssentialLinkProps>(), {
+
+const authStore = useAuthStore();
+const { loggedUser } = storeToRefs(authStore);
+
+const props = withDefaults(defineProps<EssentialLinkProps>(), {
   caption: '',
   link: '#',
   icon: '',
+  loginRequired: true
 });
+
+const shouldDisplayItem = computed(() => {
+  return (loggedUser.value !== null) || (!loggedUser.value && !props.loginRequired);
+});
+
 </script>

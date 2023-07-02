@@ -11,19 +11,34 @@
             Santri App
           </q-btn>
         </q-toolbar-title>
-        <q-btn v-if="loggedUser" dense flat round icon="menu" @click="toggleMenu" />
+        <q-btn dense flat round icon="menu" @click="toggleMenu" />
         <q-btn v-if="loggedUser" dense flat round icon="logout" @click="logoutUser" />
       </q-toolbar>
     </q-header>
 
     <q-drawer show-if-above v-model="rightDrawerOpen" side="left" bordered>
-      <q-list v-if="loggedUser">
+      <q-list>
         <q-item-label header>
-          Essential Links
+          Choose an option
         </q-item-label>
-
+        
         <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
+        
       </q-list>
+      <q-footer v-if="loggedUser"
+        class="bg-grey-3 text-dark"
+      >
+        <q-item>
+          <q-item-section>
+            {{ loggedUser.username }}
+          </q-item-section>
+            <q-item-section
+              avatar
+            >
+              <q-icon name="settings" />
+            </q-item-section>   
+        </q-item>
+      </q-footer>
     </q-drawer>
 
 
@@ -56,40 +71,11 @@ const rightDrawerOpen = ref(false);
 
 const essentialLinks = [
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
+    title: 'Babel.me',
+    caption: 'Online chat with direct translations',
     icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
+    link: 'https://quasar.dev',
+    loginRequired: false
   },
   {
     title: 'Quasar Awesome',
