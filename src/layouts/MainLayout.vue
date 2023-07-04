@@ -28,20 +28,24 @@
       <q-footer v-if="loggedUser"
         class="bg-grey-3 text-dark"
       >
-        <router-link
+        <q-btn
           to="/settings"
+          size="md"
+          align="left"
+          flat
+          class="w-full"
         >
           <q-item>
-            <q-item-section>
-              {{ loggedUser.username }}
-            </q-item-section>
             <q-item-section
               avatar
             >
               <q-icon name="settings" />
             </q-item-section>
+            <q-item-section>
+              {{ loggedUser.username }}
+            </q-item-section>
           </q-item>
-        </router-link>
+        </q-btn>
       </q-footer>
     </q-drawer>
 
