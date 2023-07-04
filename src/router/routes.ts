@@ -11,6 +11,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/IndexPage.vue')
       },
       {
+        path: '/settings',
+        name: 'Settings',
+        component: () => import('src/pages/PageSettings.vue')
+      },
+      {
         path: '/auth',
         name: 'Auth',
         component: () => import('pages/PageAuth.vue')

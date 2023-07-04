@@ -1,23 +1,26 @@
 <template>
-  <q-item
+  <q-btn
     v-if="shouldDisplayItem"
-    clickable
-    tag="a"
-    target="_blank"
-    :href="link"
+    :to="link"
+    size="md"
+    align="left"
+    flat
+    class="w-full"
   >
-    <q-item-section
-      v-if="icon"
-      avatar
-    >
-      <q-icon :name="icon" />
-    </q-item-section>
-
-    <q-item-section>
-      <q-item-label>{{ title }}</q-item-label>
-      <q-item-label caption>{{ caption }}</q-item-label>
-    </q-item-section>
-  </q-item>
+    <q-item>
+      <q-item-section
+        v-if="icon"
+        avatar
+      >
+        <q-icon :name="icon" />
+      </q-item-section>
+  
+      <q-item-section align="left">
+        <q-item-label>{{ title }}</q-item-label>
+        <q-item-label caption lines="1">{{ caption }}</q-item-label>
+      </q-item-section>
+    </q-item>
+  </q-btn>
 </template>
 
 <script setup lang="ts">

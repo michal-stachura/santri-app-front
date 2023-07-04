@@ -28,16 +28,20 @@
       <q-footer v-if="loggedUser"
         class="bg-grey-3 text-dark"
       >
-        <q-item>
-          <q-item-section>
-            {{ loggedUser.username }}
-          </q-item-section>
+        <router-link
+          to="/settings"
+        >
+          <q-item>
+            <q-item-section>
+              {{ loggedUser.username }}
+            </q-item-section>
             <q-item-section
               avatar
             >
               <q-icon name="settings" />
-            </q-item-section>   
-        </q-item>
+            </q-item-section>
+          </q-item>
+        </router-link>
       </q-footer>
     </q-drawer>
 
@@ -71,17 +75,18 @@ const rightDrawerOpen = ref(false);
 
 const essentialLinks = [
   {
-    title: 'Babel.me',
-    caption: 'Online chat with direct translations',
-    icon: 'chat',
-    link: 'https://quasar.dev',
-    loginRequired: false
+    title: 'Dashboard',
+    caption: 'All in one place',
+    icon: 'dashboard',
+    to: '/',
+    loginRequired: true
   },
   {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
+    title: 'Babel.me',
+    caption: 'Chat with your friends',
+    icon: 'chat',
+    to: '/chat',
+    loginRequired: false
   }
 ];
 
