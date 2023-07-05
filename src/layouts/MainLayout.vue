@@ -13,6 +13,7 @@
         </q-toolbar-title>
         <q-btn dense flat round icon="menu" @click="toggleMenu" />
         <q-btn v-if="loggedUser" dense flat round icon="logout" @click="logoutUser" />
+        <q-btn v-else dense flat round icon="login" to="auth" />
       </q-toolbar>
     </q-header>
 
@@ -89,7 +90,7 @@ const essentialLinks = [
     title: 'Babel.me',
     caption: 'Chat with your friends',
     icon: 'chat',
-    to: '/chat',
+    to: '/babel-me',
     loginRequired: false
   }
 ];

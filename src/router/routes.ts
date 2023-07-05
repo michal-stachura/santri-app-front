@@ -8,18 +8,35 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'HomePage',
-        component: () => import('pages/IndexPage.vue')
+        component: () => import('pages/IndexPage.vue'),
+        meta: {
+          loginRequired: true
+        }
       },
       {
         path: '/settings',
         name: 'Settings',
-        component: () => import('src/pages/PageSettings.vue')
+        component: () => import('src/pages/PageSettings.vue'),
+        meta: {
+          loginRequired: true
+        }
       },
       {
         path: '/auth',
         name: 'Auth',
-        component: () => import('pages/PageAuth.vue')
-      }
+        component: () => import('pages/PageAuth.vue'),
+        meta: {
+          loginRequired: false
+        }
+      },
+      {
+        path: '/babel-me',
+        name: 'BabelMe',
+        component: () => import('src/pages/BabelMe.vue'),
+        meta: {
+          loginRequired: false
+        }
+      },
     ]
   },
 
