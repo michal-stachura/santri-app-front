@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia';
 import { reactive, watch } from 'vue';
 import { LocalStorage } from 'quasar';
+import { showErrorMessage } from 'src/composables/show-error-message';
+import axios from 'axios';
+import { DrfError } from 'src/types/DrfError';
 
 interface Language {
   label: string;
@@ -8,7 +11,7 @@ interface Language {
 }
 
 interface Settings {
-  motherLanguage: Language;
+  nativeLanguage: Language;
 }
 
 function isObject(value: unknown): value is object {
@@ -21,13 +24,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export const useSettingsStore = defineStore('settings', () => {
   const settings = reactive<Settings>({
-    motherLanguage: { label: 'English', value: 'en' }
+    nativeLanguage: { label: 'English', value: 'en' }
   });
 
   watch(
     () => settings,
     (newValue) => {
       LocalStorage.set('settings', newValue);
+      saveSettings(newValue)
     },
     { deep: true }
   );
@@ -48,6 +52,27 @@ export const useSettingsStore = defineStore('settings', () => {
       }
     }
   };
+
+  const saveSettings = async (payload: Settings) => {
+    axios
+      .post(`${process.env.APP_API_URL}/users/me/`, payload)
+      .then((response) => {
+        if (response.status === 200) {
+          console.log('ok')
+        }
+      })
+      .catch((error: Error | DrfError) => {
+        if ('response' in error) {
+          console.log(error.response.data)
+          const errorMessage = error.response.data.detail;
+          if (errorMessage) {
+            showErrorMessage(errorMessage);
+          }
+        } else {
+          showErrorMessage(error.message);
+        }
+      });
+  }
 
   return {
     settings,

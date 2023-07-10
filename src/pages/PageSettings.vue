@@ -6,7 +6,7 @@
       </q-card-section>
 
       <q-card-section>
-        <q-select filled map-options v-model="settings.motherLanguage" :options="languages" label="Filled" />
+        <q-select filled map-options v-model="settings.nativeLanguage" :options="languages" label="Your native language" />
       </q-card-section>
     </q-card>
   </q-page>

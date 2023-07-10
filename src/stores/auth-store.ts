@@ -91,8 +91,10 @@ export const useAuthStore = defineStore('auth', () => {
         .catch((error: Error | DrfError) => {
           if ('response' in error) {
             const errorData = error.response.data;
-            const message = errorData.non_field_errors.join(', ');
-            showErrorMessage(message);
+            if (errorData.non_field_errors) {
+              const message = errorData.non_field_errors.join(', ');
+              showErrorMessage(message);
+            }
           } else {
             showErrorMessage(error.message);
           }
