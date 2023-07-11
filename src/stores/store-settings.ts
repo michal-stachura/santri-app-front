@@ -2,8 +2,8 @@ import { defineStore } from 'pinia';
 import { reactive, watch } from 'vue';
 import { LocalStorage } from 'quasar';
 import { showErrorMessage } from 'src/composables/show-error-message';
-import axios from 'axios';
 import { DrfError } from 'src/types/DrfError';
+import { authApi } from 'src/boot/axios-interceptor';
 
 interface Language {
   label: string;
@@ -54,8 +54,9 @@ export const useSettingsStore = defineStore('settings', () => {
   };
 
   const saveSettings = async (payload: Settings) => {
-    axios
-      .post(`${process.env.APP_API_URL}/users/me/`, payload)
+    
+    authApi
+      .put(`${process.env.APP_API_URL}/users/me/`, payload)
       .then((response) => {
         if (response.status === 200) {
           console.log('ok')
