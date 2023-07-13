@@ -5,17 +5,9 @@ import { showErrorMessage } from 'src/composables/show-error-message';
 import { DrfError } from 'src/types/DrfError';
 import { authApi } from 'src/boot/axios-interceptor';
 
-interface Language {
-  label: string;
-  value: string;
-}
 
 interface Settings {
-  nativeLanguage: Language;
-}
-
-function isObject(value: unknown): value is object {
-  return typeof value === 'object';
+  native_language: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -23,38 +15,41 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export const useSettingsStore = defineStore('settings', () => {
+  const initialSettings = LocalStorage.getItem('sapp_settings') as Record<string, unknown>;
   const settings = reactive<Settings>({
-    nativeLanguage: { label: 'English', value: 'en' }
+    native_language: isRecord(initialSettings) && typeof initialSettings.native_language === 'string'
+      ? initialSettings.native_language
+      : 'en'
   });
 
   watch(
-    () => settings,
+    // TODO: zapis i odczyt settingsów do bazy danych
+    () => settings.native_language,
     (newValue) => {
-      LocalStorage.set('settings', newValue);
-      saveSettings(newValue)
-    },
-    { deep: true }
+      LocalStorage.set('sapp_settings', { native_language: newValue });
+    }
   );
+
 
   const getSettings = () => {
     const localStorageSettings = LocalStorage.getItem('settings');
-
+  
     if (isRecord(localStorageSettings)) {
       for (const key in localStorageSettings) {
         const value = localStorageSettings[key];
         if (
           localStorageSettings.hasOwnProperty(key) &&
           settings.hasOwnProperty(key) &&
-          isObject(value)
-          ) {
-          settings[key as keyof Settings] = value as Language;
+          typeof value === 'string'
+        ) {
+          settings[key as keyof Settings] = value;
         }
       }
     }
   };
+  
 
-  const saveSettings = async (payload: Settings) => {
-    
+  const saveSettings = async (payload: Settings) => {    
     authApi
       .put(`${process.env.APP_API_URL}/users/me/`, payload)
       .then((response) => {
